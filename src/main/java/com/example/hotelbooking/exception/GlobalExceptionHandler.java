@@ -45,6 +45,12 @@ public class GlobalExceptionHandler {
         return new ErrorResponse("Неверное значение параметра " + exception.getName());
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidRequest(IllegalArgumentException exception) {
+        return new ErrorResponse(exception.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleUnexpectedError(Exception exception) {
