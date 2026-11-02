@@ -6,6 +6,7 @@ import com.example.hotelbooking.service.BookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +29,7 @@ public class BookingController {
         return bookingService.book(request);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<BookingResponse> findAll() {
         return bookingService.findAll();

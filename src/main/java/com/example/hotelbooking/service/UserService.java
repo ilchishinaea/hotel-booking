@@ -7,6 +7,7 @@ import com.example.hotelbooking.mapper.UserMapper;
 import com.example.hotelbooking.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     public UserResponse findById(Long id) {
         return userMapper.toResponse(getUser(id));
@@ -34,13 +36,16 @@ public class UserService {
         if (userRepository.findByUsername(request.username()).isPresent()) {
             throw new IllegalArgumentException("Имя пользователя " + request.username() + " уже занято");
         }
-        return userMapper.toResponse(userRepository.save(userMapper.toEntity(request)));
+        User user = userMapper.toEntity(request);
+        user.setPassword(passwordEncoder.encode(request.password()));
+        return userMapper.toResponse(userRepository.save(user));
     }
 
     @Transactional
     public UserResponse update(Long id, UserRequest request) {
         User user = getUser(id);
         userMapper.updateEntity(request, user);
+        user.setPassword(passwordEncoder.encode(request.password()));
         return userMapper.toResponse(userRepository.save(user));
     }
 
