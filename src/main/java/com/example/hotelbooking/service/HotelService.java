@@ -3,6 +3,7 @@ package com.example.hotelbooking.service;
 import com.example.hotelbooking.dto.HotelListResponse;
 import com.example.hotelbooking.dto.HotelRequest;
 import com.example.hotelbooking.dto.HotelResponse;
+import com.example.hotelbooking.dto.RatingRequest;
 import com.example.hotelbooking.entity.Hotel;
 import com.example.hotelbooking.mapper.HotelMapper;
 import com.example.hotelbooking.repository.HotelRepository;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Service
@@ -44,8 +47,28 @@ public class HotelService {
     }
 
     @Transactional
+    public HotelResponse updateRating(Long id, RatingRequest request) {
+        Hotel hotel = getHotel(id);
+        hotel.setRating(calculateRating(hotel, request.newMark()));
+        hotel.setNumberOfRatings(hotel.getNumberOfRatings() + 1);
+        return hotelMapper.toResponse(hotelRepository.save(hotel));
+    }
+
+    @Transactional
     public void delete(Long id) {
         hotelRepository.delete(getHotel(id));
+    }
+
+    private BigDecimal calculateRating(Hotel hotel, Integer newMark) {
+        int numberOfRatings = hotel.getNumberOfRatings();
+        if (numberOfRatings == 0) {
+            return BigDecimal.valueOf(newMark).setScale(1, RoundingMode.HALF_UP);
+        }
+        BigDecimal rating = hotel.getRating();
+        BigDecimal totalRating = rating.multiply(BigDecimal.valueOf(numberOfRatings))
+                .subtract(rating)
+                .add(BigDecimal.valueOf(newMark));
+        return totalRating.divide(BigDecimal.valueOf(numberOfRatings), 1, RoundingMode.HALF_UP);
     }
 
     private Hotel getHotel(Long id) {

@@ -3,6 +3,7 @@ package com.example.hotelbooking.controller;
 import com.example.hotelbooking.dto.HotelListResponse;
 import com.example.hotelbooking.dto.HotelRequest;
 import com.example.hotelbooking.dto.HotelResponse;
+import com.example.hotelbooking.dto.RatingRequest;
 import com.example.hotelbooking.service.HotelService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,11 @@ public class HotelController {
     @PutMapping("/{id}")
     public HotelResponse update(@PathVariable Long id, @Valid @RequestBody HotelRequest request) {
         return hotelService.update(id, request);
+    }
+
+    @PostMapping("/{id}/rating")
+    public HotelResponse updateRating(@PathVariable Long id, @Valid @RequestBody RatingRequest request) {
+        return hotelService.updateRating(id, request);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
