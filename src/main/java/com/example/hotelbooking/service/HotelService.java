@@ -1,5 +1,6 @@
 package com.example.hotelbooking.service;
 
+import com.example.hotelbooking.dto.HotelFilter;
 import com.example.hotelbooking.dto.HotelListResponse;
 import com.example.hotelbooking.dto.HotelRequest;
 import com.example.hotelbooking.dto.HotelResponse;
@@ -7,8 +8,11 @@ import com.example.hotelbooking.dto.RatingRequest;
 import com.example.hotelbooking.entity.Hotel;
 import com.example.hotelbooking.mapper.HotelMapper;
 import com.example.hotelbooking.repository.HotelRepository;
+import com.example.hotelbooking.specification.HotelSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +35,12 @@ public class HotelService {
     public HotelListResponse findAll() {
         List<Hotel> hotels = hotelRepository.findAll();
         return new HotelListResponse(hotelMapper.toResponseList(hotels), hotels.size());
+    }
+
+    public HotelListResponse findAll(HotelFilter filter) {
+        Page<Hotel> page = hotelRepository.findAll(HotelSpecification.withFilter(filter),
+                PageRequest.of(filter.pageNumber(), filter.pageSize()));
+        return new HotelListResponse(hotelMapper.toResponseList(page.getContent()), page.getTotalElements());
     }
 
     @Transactional
