@@ -1,7 +1,9 @@
 package com.example.hotelbooking.service;
 
+import com.example.hotelbooking.dto.BookingListResponse;
 import com.example.hotelbooking.dto.BookingRequest;
 import com.example.hotelbooking.dto.BookingResponse;
+import com.example.hotelbooking.dto.PageFilter;
 import com.example.hotelbooking.entity.Booking;
 import com.example.hotelbooking.entity.Room;
 import com.example.hotelbooking.entity.User;
@@ -11,10 +13,10 @@ import com.example.hotelbooking.repository.RoomRepository;
 import com.example.hotelbooking.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +28,10 @@ public class BookingService {
     private final UserRepository userRepository;
     private final BookingMapper bookingMapper;
 
-    public List<BookingResponse> findAll() {
-        return bookingMapper.toResponseList(bookingRepository.findAll());
+    public BookingListResponse findAll(PageFilter filter) {
+        Page<Booking> page = bookingRepository.findAll(
+                PageRequest.of(filter.pageNumber(), filter.pageSize()));
+        return new BookingListResponse(bookingMapper.toResponseList(page.getContent()), page.getTotalElements());
     }
 
     @Transactional

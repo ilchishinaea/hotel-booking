@@ -1,5 +1,7 @@
 package com.example.hotelbooking.controller;
 
+import com.example.hotelbooking.dto.RoomFilter;
+import com.example.hotelbooking.dto.RoomListResponse;
 import com.example.hotelbooking.dto.RoomRequest;
 import com.example.hotelbooking.dto.RoomResponse;
 import com.example.hotelbooking.service.RoomService;
@@ -9,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,6 +30,11 @@ public class RoomController {
     @GetMapping("/{id}")
     public RoomResponse findById(@PathVariable Long id) {
         return roomService.findById(id);
+    }
+
+    @GetMapping("/filter")
+    public RoomListResponse findAll(@Valid @ModelAttribute RoomFilter filter) {
+        return roomService.findAll(filter);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
