@@ -11,6 +11,7 @@ import com.example.hotelbooking.mapper.BookingMapper;
 import com.example.hotelbooking.repository.BookingRepository;
 import com.example.hotelbooking.repository.RoomRepository;
 import com.example.hotelbooking.repository.UserRepository;
+import com.example.hotelbooking.statistics.producer.StatisticsProducer;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,6 +28,7 @@ public class BookingService {
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final BookingMapper bookingMapper;
+    private final StatisticsProducer statisticsProducer;
 
     public BookingListResponse findAll(PageFilter filter) {
         Page<Booking> page = bookingRepository.findAll(
@@ -50,7 +52,10 @@ public class BookingService {
         Booking booking = bookingMapper.toEntity(request);
         booking.setRoom(room);
         booking.setUser(user);
-        return bookingMapper.toResponse(bookingRepository.save(booking));
+        Booking createdBooking = bookingRepository.save(booking);
+        statisticsProducer.sendRoomBooked(user.getId(), createdBooking.getCheckInDate(),
+                createdBooking.getCheckOutDate());
+        return bookingMapper.toResponse(createdBooking);
     }
 
     private boolean isRoomTaken(Long roomId, BookingRequest request) {

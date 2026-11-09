@@ -5,6 +5,7 @@ import com.example.hotelbooking.dto.UserResponse;
 import com.example.hotelbooking.entity.User;
 import com.example.hotelbooking.mapper.UserMapper;
 import com.example.hotelbooking.repository.UserRepository;
+import com.example.hotelbooking.statistics.producer.StatisticsProducer;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +20,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final StatisticsProducer statisticsProducer;
 
     public UserResponse findById(Long id) {
         return userMapper.toResponse(getUser(id));
@@ -38,7 +40,9 @@ public class UserService {
         }
         User user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.password()));
-        return userMapper.toResponse(userRepository.save(user));
+        User createdUser = userRepository.save(user);
+        statisticsProducer.sendUserRegistered(createdUser.getId());
+        return userMapper.toResponse(createdUser);
     }
 
     @Transactional
